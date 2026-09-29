@@ -1,0 +1,102 @@
+IoT Sensor Troubleshooting Guide
+=================================
+Covers: Temperature, Humidity, Motion (PIR), Door/Window Contact,
+        CO/Smoke, Air Quality, and Light sensors
+Reference Standard: Zigbee 3.0, Z-Wave Plus, BLE sensors
+
+1. SENSOR NOT REPORTING / OFFLINE
+-----------------------------------
+Step 1 — Check battery
+Low battery is the #1 cause of sensor failure. Replace with a fresh battery
+of the correct type (CR2032, AA, AAA — check the device label). Voltage below
+2.5 V for CR2032 or below 1.1 V per cell for AA/AAA will cause erratic behavior
+before full failure.
+
+Step 2 — Check range / mesh health
+For Zigbee and Z-Wave sensors: the sensor communicates via mesh routing.
+  - Verify the nearest mains-powered device (bulb, plug) is within ~10 m.
+  - Obstructions (concrete walls, metal panels) can halve effective range.
+  - On Zigbee: use the coordinator's "Rebuild network map" or "Heal network"
+    function to update routing tables after adding/removing devices.
+  - On Z-Wave: Z-Wave controllers have an "Optimize Network" or "Heal Node"
+    command — run this after any topology change.
+
+Step 3 — Re-pair the sensor
+  Zigbee: Put hub in pairing mode → hold the sensor's pair button 5 s until
+  LED flashes → hub should discover within 60 s.
+  Z-Wave: Put hub in "Include" mode → triple-press or hold the pair button
+  as described in the device manual.
+  BLE: Remove the device from the mobile app → factory reset → re-add.
+
+Step 4 — Check hub/coordinator logs
+Most hubs provide a device log or event history. Errors to look for:
+  - "Device timeout" — sensor sent no message within the expected interval
+  - "Route failed" — mesh routing broken; run network heal
+  - "Unsupported cluster" — firmware version mismatch between sensor and hub
+
+2. SENSOR REPORTING INCORRECT VALUES
+--------------------------------------
+Temperature sensor reads wrong:
+  - Direct sunlight or proximity to a heat source biases readings.
+    Move sensor away from vents, appliances, and windows.
+  - Some sensors allow a calibration offset in settings (±5°C typical).
+  - If offset alone doesn't fix it, the sensor may be faulty — compare
+    against a calibrated thermometer.
+
+Humidity sensor reads wrong:
+  - Condensation on the sensor element causes permanently elevated readings.
+    Replace the sensor if it was exposed to water.
+  - Allow 30 minutes acclimatisation in the target room before trusting readings.
+
+Motion (PIR) sensor false triggers:
+  - Pets, HVAC vents blowing warm air, and direct sunlight hitting reflective
+    surfaces are common false-trigger sources.
+  - Reduce the sensor's sensitivity (if adjustable) or reposition to avoid
+    line-of-sight to vents.
+  - PIR sensors detect relative heat change; a room heating up uniformly
+    will NOT trigger them.
+
+Door/window contact sensor stuck open/closed:
+  - Check magnet alignment. Gap between magnet and sensor body should be
+    ≤ 10 mm. Many sensors include a spacer for metal (conductive) doors.
+  - Clean the reed switch area with compressed air.
+  - If alignment is correct and issue persists, the reed switch may be
+    damaged — replace the sensor.
+
+3. INTERMITTENT SENSOR DROPS (ZIGBEE/Z-WAVE)
+---------------------------------------------
+Cause A — Channel interference (Zigbee)
+Zigbee channels 11–26 overlap with WiFi channels 1–13. Recommended Zigbee
+channels that avoid WiFi overlap:
+  Zigbee 15 → avoids WiFi 1
+  Zigbee 20 → avoids WiFi 6
+  Zigbee 25 → avoids WiFi 11
+To change: Hub admin panel > Zigbee Settings > Channel.
+Note: Changing channel forces all devices to re-pair.
+
+Cause B — Too many end-devices, not enough routers
+Zigbee end-devices (battery sensors) do NOT route. You need at least one
+mains-powered Zigbee router (smart plug, bulb) per ~10 end-devices.
+Z-Wave networks are self-healing but also benefit from router nodes
+distributed throughout the home.
+
+4. CO / SMOKE SENSOR ALERTS
+-----------------------------
+If a CO or smoke sensor triggers unexpectedly:
+  - Evacuate the building first — treat every alarm as real until confirmed false.
+  - After confirming safety: check for steam from showers/cooking near the sensor.
+    CO sensors can be triggered by propane, alcohol fumes, and other gases.
+  - Test mode: hold the test button — a periodic chirp (not continuous) indicates
+    a low-battery warning, not a detected event.
+  - CO sensors have a fixed lifespan (typically 5–7 years). Check manufacture
+    date on the label. Replace expired sensors immediately.
+  ⚠️  Never disable or remove a CO/smoke sensor based on false alarms alone.
+      Replace the sensor and identify the root cause.
+
+5. ERROR CODES — COMMON SENSORS
+---------------------------------
+E1 — Internal sensor fault (hardware defect). Replace device.
+E2 — Communication error (hub unreachable). Check range and re-pair.
+E3 — Calibration out of range. Perform manual calibration or replace.
+LOW / LO BATT — Battery below threshold. Replace immediately.
+TAMPER — Device case opened or tamper switch triggered. Check for intrusion.

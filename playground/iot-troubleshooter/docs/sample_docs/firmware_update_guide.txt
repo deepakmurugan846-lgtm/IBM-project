@@ -1,0 +1,93 @@
+Firmware Update Guide — IoT Devices
+=====================================
+Generic Multi-Vendor Reference | v1.4
+
+1. WHEN TO UPDATE FIRMWARE
+--------------------------
+Update firmware when:
+  - The device app notifies you of an available update
+  - The device exhibits bugs listed in the release notes
+  - A security advisory has been published for your firmware version
+  - The device has lost cloud connectivity and connectivity issues are unresolved
+
+Do NOT update firmware when:
+  - The device is functioning correctly and the update is not security-critical
+    (risk of regression is real)
+  - Power supply is unreliable — a power cut during flashing can brick the device
+
+2. GENERAL UPDATE PROCEDURE
+-----------------------------
+Step 1 — Back up settings
+Export device configuration via the companion app before starting. Not all
+devices support this; document your settings manually if necessary.
+
+Step 2 — Check current firmware version
+Navigate to: Device App > Settings > About / Device Info > Firmware Version.
+Note the version number before and after updating.
+
+Step 3 — Ensure stable power and WiFi
+  - Connect the IoT device to a wired power source (not battery-only).
+  - Ensure the device is within 2 metres of your router for the update.
+  - Do not use a VPN during firmware updates — it can interrupt the download.
+
+Step 4 — Initiate the update
+  Option A (OTA — Over The Air): Use the companion app's "Check for Updates"
+  or "Firmware Update" option. The device downloads and installs automatically.
+  Option B (Manual / local): Download the firmware binary from the
+  manufacturer's support page. Use the device's local web UI (access via its
+  IP address in a browser) to upload the file.
+
+Step 5 — Do not interrupt
+The LED will typically show a pulsing or alternating pattern during flash.
+The device will reboot 1–3 times. This process takes 2–10 minutes.
+⚠️  Cutting power during a firmware flash will corrupt the device firmware.
+     Recovery may require a UART/serial connection or manufacturer service.
+
+Step 6 — Verify
+After the final reboot, confirm the new firmware version in Device Info.
+Check that all device functions (control, scheduling, scenes) still work.
+
+3. ROLLBACK / DOWNGRADE
+------------------------
+Most consumer IoT devices do NOT support firmware downgrade due to
+anti-rollback fuses. If a new firmware introduces a regression:
+  - Check the manufacturer's forum for a hotfix.
+  - Contact support — some vendors can issue a specific version on request.
+
+4. COMMON FIRMWARE UPDATE ERRORS
+----------------------------------
+Error: "Update failed — check internet connection"
+  Cause: DNS or firewall blocking the update server.
+  Fix: Temporarily disable firewall rules. Try DNS 8.8.8.8.
+
+Error: "Firmware checksum mismatch"
+  Cause: Corrupted download.
+  Fix: Re-download the firmware file. Verify MD5/SHA256 checksum if provided.
+
+Error: Device unresponsive after update (solid red LED)
+  Cause: Partial flash or incompatible firmware file.
+  Fix: Try a factory reset (hold reset button 10 s). If unsuccessful,
+       contact manufacturer support — device may need RMA.
+
+Error: "Incompatible hardware revision"
+  Cause: Wrong firmware file downloaded for a different hardware revision.
+  Fix: Re-check the hardware revision printed on the device label
+       (usually "HW Rev" or "PCB version") and download the matching firmware.
+
+5. OVER-THE-AIR (OTA) SECURITY NOTES
+--------------------------------------
+  - Only accept firmware signed by the manufacturer's certificate.
+  - If the device app warns about an unsigned update, REFUSE it — this
+    may indicate a MITM (man-in-the-middle) attack.
+  - After any firmware update, rotate API keys and device passwords
+    as a security best practice.
+
+6. DEVICE-SPECIFIC NOTES
+-------------------------
+  - Smart thermostats: Firmware updates typically require a C-wire or
+    battery charge ≥ 20%.
+  - IP cameras: Update during off-peak hours; streams will be interrupted.
+  - Zigbee/Z-Wave coordinators (hubs): Update the hub firmware before
+    updating individual end-devices to avoid protocol version mismatches.
+  - Industrial PLCs/sensors: Always consult the OEM before updating in
+    production environments. Test on a staging device first.

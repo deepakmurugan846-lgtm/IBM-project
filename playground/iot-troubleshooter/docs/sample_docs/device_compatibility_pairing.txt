@@ -1,0 +1,114 @@
+IoT Device Compatibility & Pairing Guide
+=========================================
+Generic Reference — Smart Home Ecosystems
+Covers: Matter, Zigbee, Z-Wave, WiFi (LAN/Cloud), Bluetooth, Thread
+
+1. COMPATIBILITY OVERVIEW
+--------------------------
+Before pairing, confirm three things:
+  1. Protocol match — does your device speak the same protocol as your hub?
+  2. Version match — e.g., Zigbee 3.0 hub + Zigbee 1.2 device usually works
+     but not always (cluster support varies).
+  3. Ecosystem match — even on the same protocol, some vendors lock devices
+     to their own cloud and block third-party control.
+
+2. MATTER DEVICES
+------------------
+Matter is a cross-platform, IP-based standard (WiFi / Thread).
+Supported controllers: Apple HomeKit (iOS 16.3+), Google Home, Amazon Alexa,
+Samsung SmartThings, Home Assistant.
+
+Pairing procedure:
+  Step 1 — Scan the 11-digit Matter QR code (on device/packaging) or
+           type the numeric pairing code into the controller app.
+  Step 2 — The device must be in "commissioning" mode (fresh/reset).
+           Factory reset to re-enable commissioning mode.
+  Step 3 — For Thread devices: ensure a Thread Border Router is present
+           on the same network (HomePod mini, Apple TV 4K, Google Nest Hub).
+
+Common Matter pairing failures:
+  - "Device not found": Ensure device and phone are on the same WiFi network
+    during pairing. Thread devices need a border router.
+  - "Pairing failed — wrong code": The Matter code is single-use in some
+    implementations. Factory reset and try again.
+  - Duplicate device: Device already claimed by another controller — factory
+    reset to release it.
+
+3. ZIGBEE PAIRING
+------------------
+Step 1 — Put hub in pairing mode
+Most hubs: open the device list and click "Add device" or "Pair device".
+The hub enters pairing mode for 60–300 seconds.
+
+Step 2 — Put device in pairing mode
+New device: Simply power on.
+Previously paired: Hold the pair button 5–10 s until LED flashes quickly.
+The pattern for your specific device is in its quick-start guide.
+
+Step 3 — Check discovery
+The device should appear within 60 s. If not:
+  - Move the device closer to the hub (within 1 m) for initial pairing,
+    then move to final location.
+  - Check hub channel matches the expected Zigbee channel.
+  - Verify the hub supports the device's Zigbee profile
+    (Home Automation, Light Link, Green Power, etc.).
+
+4. Z-WAVE PAIRING (INCLUSION)
+-------------------------------
+Z-Wave uses "inclusion" and "exclusion" instead of pair/unpair.
+Each device has a unique Home ID and Node ID assigned by the controller.
+
+Inclusion (pairing):
+  Step 1 — Put Z-Wave controller in Include mode.
+  Step 2 — Trigger the device's Include sequence (typically 3x quick press
+           of the action button within 1 second).
+  Step 3 — Controller assigns Node ID. Device LED confirms.
+
+Exclusion (unpairing from a different network):
+  If a device was previously included on another controller, you MUST
+  exclude it first:
+  Step 1 — Put your controller in Exclude mode.
+  Step 2 — Trigger the device's Include/Exclude sequence.
+  Step 3 — The controller will confirm exclusion even though the device was
+           on a different network. This resets the device's network credentials.
+
+Z-Wave interview failure:
+If the controller gets stuck during "Interview" or "Healing" after inclusion:
+  - Run "Re-interview" or "Refresh Node" from the controller UI.
+  - Ensure the device is powered and within range.
+  - Some S2 security frameworks time out — ensure controller clock is correct.
+
+5. BLUETOOTH / BLE PAIRING
+----------------------------
+Step 1 — Enable Bluetooth on your phone/hub.
+Step 2 — Put device in BLE advertising mode (power on or hold pair button).
+Step 3 — In the app, select "Add device" > scan for the device.
+Step 4 — If prompted, enter the PIN (usually "0000" or "1234" or printed
+         on the device label).
+
+BLE pairing failure — common causes:
+  - Range: BLE effective range is 10 m open air, less indoors.
+  - Bonding database full: phone's BLE stack has a bonding limit (~10 devices
+    on some platforms). Remove unused BLE bonds in phone BT settings.
+  - Duplicate bond: Device is already bonded to another phone. Factory reset.
+  - iOS background refresh: Some BLE devices require the app to be in the
+    foreground during the full pairing sequence.
+
+6. DEVICE INCOMPATIBILITY FLAGS
+---------------------------------
+If a device pairs but does not function correctly:
+  - Check for a known incompatibility list on the hub's official website.
+  - Join the hub's community forum and search the device model number.
+  - Older Zigbee HA1.2 devices may be visible on a Zigbee 3.0 network but
+    advanced features (scenes, groups) may not work.
+  - Some devices use manufacturer-proprietary clusters — these only work with
+    the vendor's own app even when on a standard protocol.
+
+7. MULTI-PROTOCOL HUB SETUP NOTES
+------------------------------------
+Hubs supporting multiple protocols (e.g., Home Assistant + ConBee II):
+  - Each radio (Zigbee, Z-Wave) must be on its own USB port.
+  - Assign persistent USB paths (/dev/serial/by-id/…) to avoid port swapping
+    after reboots.
+  - USB extension cables (15–30 cm) improve RF performance by moving the
+    USB stick away from the USB 3.0 port (USB 3.0 causes 2.4 GHz interference).

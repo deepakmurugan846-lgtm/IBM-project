@@ -1,0 +1,102 @@
+IoT Device Troubleshooting Guide — WiFi Connectivity
+======================================================
+Version 2.1 | Generic / Multi-Vendor Reference
+
+1. OVERVIEW
+-----------
+WiFi connectivity is the most common failure category for consumer IoT devices.
+Issues fall into four buckets: (A) initial pairing failure, (B) intermittent
+drops after successful connection, (C) inability to reconnect after a reboot,
+and (D) reduced range or slow throughput.
+
+2. INITIAL PAIRING FAILURES
+----------------------------
+Symptom: Device does not appear in the mobile app or setup wizard times out.
+
+Step 1 — Verify band compatibility
+Most IoT devices (smart plugs, bulbs, sensors) operate ONLY on the 2.4 GHz
+band. If your router broadcasts a single SSID for both 2.4 GHz and 5 GHz
+("band steering"), the device may attempt to join 5 GHz and fail.
+  Fix: Create a dedicated 2.4 GHz SSID in your router admin panel, or
+       temporarily disable 5 GHz during pairing.
+
+Step 2 — Check SSID length and characters
+Some devices have a 32-character SSID limit and do not support spaces or
+special characters (!, @, #, $, %, etc.) in the password.
+  Fix: Simplify your SSID and password to alphanumeric characters only
+       during initial setup.
+
+Step 3 — WPA3 / WPA2 mismatch
+Older IoT firmware often supports WPA2-PSK (AES) but not WPA3-SAE.
+If your router is set to "WPA3 Only" the device will fail the handshake.
+  Fix: Set router security to "WPA2/WPA3 Mixed" or "WPA2-PSK (AES)".
+
+Step 4 — DHCP pool exhaustion
+If your router's DHCP pool is fully allocated the device will not receive
+an IP address and will appear disconnected.
+  Fix: Check connected devices in the router admin panel. Increase the
+       DHCP range or release stale leases.
+
+Step 5 — Factory reset the device
+Hold the reset button for 5–10 seconds (device-specific; consult the label)
+until the LED flashes rapidly. This clears any prior network credentials.
+⚠️  A factory reset erases all device settings and scene configurations.
+
+3. INTERMITTENT DROPS
+---------------------
+Symptom: Device connects initially but goes offline periodically (minutes to hours).
+
+Cause 3a — RF interference
+Microwave ovens, baby monitors, and Bluetooth speakers operate on 2.4 GHz and
+can cause packet loss. Zigbee and WiFi channels can also overlap.
+  Fix: Change WiFi channel to 1, 6, or 11 (non-overlapping). Move device
+       away from microwave.
+
+Cause 3b — DHCP lease renewal failure
+If the router refuses to renew a lease, the device loses its IP.
+  Fix: Assign a static IP or DHCP reservation using the device's MAC address.
+
+Cause 3c — Router "client isolation" or AP isolation
+Some mesh networks isolate clients from each other, breaking cloud callbacks.
+  Fix: Disable AP isolation in the router/mesh settings.
+
+Cause 3d — Firmware power-management bug
+Some devices aggressively enter power-save mode and miss keep-alive packets.
+  Fix: Check the manufacturer's latest firmware — power-management bugs are
+       frequently patched. Update via the device app.
+
+4. REBOOT RECONNECTION ISSUES
+------------------------------
+Symptom: Device connects fine, but after a power cycle it cannot reconnect.
+
+Step 1 — Confirm stored credentials
+If the router SSID or password changed, the device still holds the old
+credentials. Re-pair the device.
+
+Step 2 — Order of boot
+Bring the router/gateway up fully (≥60 seconds) before powering the IoT
+device. Many devices time out during the DHCP negotiation window at boot.
+
+Step 3 — DNS resolution
+Some devices phone home to a cloud server during boot. If your router uses
+a custom DNS that blocks the manufacturer's domain, the device will show
+as offline even when connected to WiFi.
+  Fix: Temporarily switch DNS to 8.8.8.8 and test.
+
+5. LED STATUS CODES (generic)
+------------------------------
+Slow blink (1/sec): Searching for network / not paired
+Fast blink (3/sec): Pairing mode active
+Solid: Connected and operational
+Double blink: Authentication error (wrong password)
+3 rapid blinks + pause: IP address not obtained (DHCP failure)
+Alternating red/white: Firmware update in progress — do NOT power off
+Solid red: Hardware fault or cloud connectivity failure
+
+6. ESCALATION CRITERIA
+-----------------------
+Escalate to manufacturer support when:
+  - All steps above have been attempted without resolution
+  - The device shows solid red LED continuously
+  - The device is within the 1-year warranty period
+  - Physical damage is visible on the device
